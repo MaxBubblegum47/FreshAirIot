@@ -17,7 +17,7 @@ Adafruit_BMP280 bme; // I2C
 
 // MQTT Broker Configuration
 const char *mqtt_broker = "broker.emqx.io";  // EMQX broker endpoint
-const char *mqtt_topic = "emqx/esp8266_camera";     // MQTT topic
+const char *mqtt_topic = "emqx/esp8266_room";     // MQTT topic
 const char *mqtt_username = "emqx";  // MQTT username for authentication
 const char *mqtt_password = "public";  // MQTT password for authentication
 const int mqtt_port = 1883;  // MQTT port (TCP)

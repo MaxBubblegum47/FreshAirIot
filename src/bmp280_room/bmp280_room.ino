@@ -3,13 +3,16 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
 #include "WifiPassword.h"
+#include "mqttCredentials.h"
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
- 
+
 #define BMP_SCK 13
 #define BMP_MISO 12
 #define BMP_MOSI 11 
 #define BMP_CS 10
+
+#define SEALEVELPRESSURE_HPA (1013.25)
  
 Adafruit_BMP280 bme; // I2C
 //Adafruit_BMP280 bme(BMP_CS); // hardware SPI
@@ -17,9 +20,12 @@ Adafruit_BMP280 bme; // I2C
 
 // MQTT Broker Configuration
 const char *mqtt_broker = "broker.emqx.io";  // EMQX broker endpoint
-const char *mqtt_topic = "emqx/esp8266_room";     // MQTT topic
-const char *mqtt_username = "emqx";  // MQTT username for authentication
-const char *mqtt_password = "public";  // MQTT password for authentication
+const char *mqtt_topic_temperature = "home/room/temperature";
+const char *mqtt_topic_pressure = "home/room/pressure";
+const char *mqtt_topic_height = "home/room/height";
+
+const char *mqtt_username = username;  // MQTT username for authentication
+const char *mqtt_password = password_mqtt;  // MQTT password for authentication
 const int mqtt_port = 1883;  // MQTT port (TCP)
 
 WiFiClient espClient;
@@ -64,9 +70,13 @@ void connectToMQTTBroker() {
         Serial.printf("Connecting to MQTT Broker as %s.....\n", client_id.c_str());
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
-            mqtt_client.subscribe(mqtt_topic);
+
+            mqtt_client.subscribe(mqtt_topic_temperature);
+            mqtt_client.subscribe(mqtt_topic_pressure);
+            mqtt_client.subscribe(mqtt_topic_height);
+
             // Publish message upon successful connection
-            mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP8266 ^^");
+            // mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP8266 ^^");
         } else {
             Serial.print("Failed to connect to MQTT broker, rc=");
             Serial.print(mqtt_client.state());
@@ -109,5 +119,11 @@ void loop() {
   Serial.println(" m");
   
   Serial.println();
+
+  mqtt_client.publish(mqtt_topic_pressure, String(bme.readPressure()).c_str());
+  mqtt_client.publish(mqtt_topic_temperature, String(bme.readTemperature()).c_str());
+  mqtt_client.publish(mqtt_topic_height, String(bme.readAltitude(SEALEVELPRESSURE_HPA)).c_str());
+
+
   delay(10000);
 }

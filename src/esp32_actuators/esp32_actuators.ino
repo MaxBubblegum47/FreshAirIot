@@ -45,13 +45,18 @@ int melody[] = {
 
 
 const char *mqtt_broker = "broker.emqx.io";  // EMQX broker endpoint
-const char *mqtt_topic = "home/room/window";     // MQTT topic
+
+const char *mqtt_topic_temperature_room = "home/room/temperature";
+const char *mqtt_topic_temperature_hall = "home/hall/temperature";
+const char *mqtt_topic_actuators = "home/actuators";
+
 const char *mqtt_username = username;  // MQTT username for authentication
-const char *mqtt_password = password;  // MQTT password for authentication
+const char *mqtt_password = password_mqtt;  // MQTT password for authentication
 const int mqtt_port = 1883;  // MQTT port (TCP)
 const int mqttpayloadSize = 100;
-char mqttpayload [mqttpayloadSize] = {'\0'};
-
+char mqttpayload_room_temp [mqttpayloadSize] = {'\0'};
+char mqttpayload_hall_temp [mqttpayloadSize] = {'\0'};
+char mqttpayload_actuators [mqttpayloadSize] = {'\0'};
 WiFiClient espClient;
 PubSubClient mqtt_client(espClient);
 
@@ -89,7 +94,10 @@ void connectToMQTTBroker() {
         Serial.printf("Connecting to MQTT Broker as %s.....\n", client_id.c_str());
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
-            mqtt_client.subscribe(mqtt_topic);
+            mqtt_client.subscribe(mqtt_topic_temperature_room);
+            mqtt_client.subscribe(mqtt_topic_temperature_hall);
+            mqtt_client.subscribe(mqtt_topic_actuators);            
+            
             // Publish message upon successful connection
             // mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP32 Actuators ^^");
         } else {
@@ -102,16 +110,36 @@ void connectToMQTTBroker() {
 }
 
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
-    mqttpayload [mqttpayloadSize] = {'\0'};
+    mqttpayload_room_temp [mqttpayloadSize] = {'\0'};
+    mqttpayload_hall_temp [mqttpayloadSize] = {'\0'};
+    mqttpayload_actuators [mqttpayloadSize] = {'\0'};
+
     Serial.print("Message received on topic: ");
     Serial.println(topic);
     Serial.print("Message:");
+
     for (unsigned int i = 0; i < length; i++) {
         Serial.print((char) payload[i]);
     }
+    
+    Serial.println();
 
-    memcpy(mqttpayload, payload, length);
+    if (strcmp(topic, "home/actuators") == 0){
+          memcpy(mqttpayload_actuators, payload, length);
+          Serial.println("Sono dentro il check di 1");
+    }
 
+    if (!strcmp(topic, "home/room/temperature") == 0){
+          memcpy(mqttpayload_room_temp, payload, length);
+          Serial.println("Sono dentro il check di 2");
+
+    }
+
+    if (!strcmp(topic, "home/hall/temperature") == 0){
+          memcpy(mqttpayload_hall_temp, payload, length);
+          Serial.println("Sono dentro il check di 3");
+
+    }
     Serial.println();
     Serial.println("-----------------------");
 }
@@ -135,8 +163,8 @@ void loop() {
   // color code #00C9CC (R = 0,   G = 201, B = 204)
   setColor(255, 0, 0);
 
-  char *str2 = "Air quality is Good";
-  int value = strcmp(mqttpayload,str2);  
+  char *str2 = "OPEN";
+  int value = strcmp(mqttpayload_actuators,str2);
 
   if (value == 0){
     setColor(0,255,0);

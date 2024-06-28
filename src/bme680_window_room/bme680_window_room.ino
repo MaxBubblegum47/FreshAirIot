@@ -11,6 +11,7 @@
 #include "mqttCredentials.h"
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
+#include <stdio.h> 
 
 /*#define BME_SCK 14
 #define BME_MISO 12
@@ -21,6 +22,8 @@
 #define MIN_VALUE 25
 #define MAX_VALUE 800
 #define REPORT_INTERVAL 1
+#define MAX 100 
+
 Adafruit_BME680 bme; // I2C
 //Adafruit_BME680 bme(BME_CS); // hardware SPI
 //Adafruit_BME680 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK);
@@ -37,9 +40,18 @@ int   getgasreference_count = 0;
 
 // MQTT Broker Configuration
 const char *mqtt_broker = "broker.emqx.io";  // EMQX broker endpoint
-const char *mqtt_topic = "home/room/window";     // MQTT topic
+
+// MQTT Topics
+const char *mqtt_topic_temperature = "home/room/window/temperature";
+const char *mqtt_topic_pressure = "home/room/window/pressure";
+const char *mqtt_topic_humidity = "home/room/window/humidity";
+const char *mqtt_topic_airquality = "home/room/window/airquality";
+const char *mqtt_topic_light = "home/room/window/light";
+const char *mqtt_topic_height = "home/room/window/height";
+const char *mqtt_topic_actuators = "home/actuators";
+
 const char *mqtt_username = username;  // MQTT username for authentication
-const char *mqtt_password = password;  // MQTT password for authentication
+const char *mqtt_password = password_mqtt;  // MQTT password for authentication
 const int mqtt_port = 1883;  // MQTT port (TCP)
 
 WiFiClient espClient;
@@ -92,7 +104,15 @@ void connectToMQTTBroker() {
         Serial.printf("Connecting to MQTT Broker as %s.....\n", client_id.c_str());
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
-            mqtt_client.subscribe(mqtt_topic);
+
+            mqtt_client.subscribe(mqtt_topic_temperature);
+            mqtt_client.subscribe(mqtt_topic_pressure);
+            mqtt_client.subscribe(mqtt_topic_humidity);
+            mqtt_client.subscribe(mqtt_topic_airquality);
+            mqtt_client.subscribe(mqtt_topic_light);
+            mqtt_client.subscribe(mqtt_topic_height);
+            mqtt_client.subscribe(mqtt_topic_actuators);
+
             // Publish message upon successful connection
             // mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP8266 Window Room ^^");
         } else {
@@ -147,7 +167,7 @@ void loop() {
   }
   Serial.print(F("Reading completed at "));
   Serial.println(millis());
-
+  
   Serial.print(F("Temperature = "));
   Serial.print(bme.temperature);
   Serial.println(F(" *C"));
@@ -211,19 +231,61 @@ void loop() {
   Serial.println("LUX = ");
   Serial.println(sensorValue);
 
+
+  // Light Data
+  String light_text = "";
   if (sensorValue < 40) {
     Serial.println(" => Dark");
+    light_text += "Dark";
+
   } else if (sensorValue < 60) {
     Serial.println(" => Dim");
+    light_text += "Dim";
+
   } else if (sensorValue < 70) {
     Serial.println(" => Light");
+    light_text += "Light";
+
   } else if (sensorValue < 80) {
     Serial.println(" => Bright");
+    light_text += "Bright";
+
   } else {
     Serial.println(" => Very bright");
+    light_text += "Very bright";
+
+  }
+  
+  // External Condition Calculation
+  String actuators_message = "";
+
+  if (strcmp (aqs.c_str(), "Good") == 0 || strcmp (aqs.c_str(), "Moderate") == 0){
+    if (bme.pressure > 100000) {
+        if (bme.temperature > 12 && bme.temperature < 29){
+          if  (bme.humidity < 60){
+            actuators_message = "OPEN";
+          } else {
+            actuators_message = "MAYBE OPEN";
+          }
+        } else {
+          actuators_message = "CLOSE";
+        }
+    } else {
+      actuators_message = "CLOSE";
+    }
+  } else {
+    actuators_message = "CLOSE";
   }
 
-  mqtt_client.publish(mqtt_topic, aqs.c_str());
+  // MQTT Publish Messages
+  mqtt_client.publish(mqtt_topic_airquality, aqs.c_str());
+  mqtt_client.publish(mqtt_topic_light, light_text.c_str());
+  mqtt_client.publish(mqtt_topic_pressure, String(bme.pressure).c_str());
+  mqtt_client.publish(mqtt_topic_humidity, String(bme.humidity).c_str());
+  mqtt_client.publish(mqtt_topic_temperature, String(bme.temperature).c_str());
+  mqtt_client.publish(mqtt_topic_height, String(bme.readAltitude(SEALEVELPRESSURE_HPA)).c_str());
+  mqtt_client.publish(mqtt_topic_actuators, actuators_message.c_str());
+
 
   delay(1000 * 10 * REPORT_INTERVAL);
 
@@ -240,7 +302,7 @@ void loop() {
 }
 
   String CalculateIAQ(float score){
-  String IAQ_text = "Air quality is ";
+  String IAQ_text = "";
   score = (100-score)*5;
   if      (score >= 301)                  IAQ_text += "Hazardous";
   else if (score >= 201 && score <= 300 ) IAQ_text += "Very Unhealthy";

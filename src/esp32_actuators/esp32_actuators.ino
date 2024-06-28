@@ -126,19 +126,14 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 
     if (strcmp(topic, "home/actuators") == 0){
           memcpy(mqttpayload_actuators, payload, length);
-          Serial.println("Sono dentro il check di 1");
     }
 
     if (!strcmp(topic, "home/room/temperature") == 0){
           memcpy(mqttpayload_room_temp, payload, length);
-          Serial.println("Sono dentro il check di 2");
-
     }
 
     if (!strcmp(topic, "home/hall/temperature") == 0){
           memcpy(mqttpayload_hall_temp, payload, length);
-          Serial.println("Sono dentro il check di 3");
-
     }
     Serial.println();
     Serial.println("-----------------------");
@@ -160,14 +155,11 @@ void loop() {
 
   mqtt_client.loop();
 
-  // color code #00C9CC (R = 0,   G = 201, B = 204)
-  setColor(255, 0, 0);
-
-  char *str2 = "OPEN";
-  int value = strcmp(mqttpayload_actuators,str2);
-
-  if (value == 0){
+  Serial.println (mqttpayload_actuators);
+  if (strstr(mqttpayload_actuators, "OPEN") != NULL) {
     setColor(0,255,0);
+  } else {
+    setColor(255,0,0);
   }
   delay(1000);
 

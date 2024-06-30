@@ -10,45 +10,56 @@
 #define PIN_GREEN  23 // GPIO22
 #define PIN_BLUE   18 // GPIO21
 
-int melody[] = {
-  
-  NOTE_E5, 4,  NOTE_B4,8,  NOTE_C5,8,  NOTE_D5,4,  NOTE_C5,8,  NOTE_B4,8,
-  NOTE_A4, 4,  NOTE_A4,8,  NOTE_C5,8,  NOTE_E5,4,  NOTE_D5,8,  NOTE_C5,8,
-  NOTE_B4, -4,  NOTE_C5,8,  NOTE_D5,4,  NOTE_E5,4,
-  NOTE_C5, 4,  NOTE_A4,4,  NOTE_A4,8,  NOTE_A4,4,  NOTE_B4,8,  NOTE_C5,8,
+int melody_good[] = {
 
-  NOTE_D5, -4,  NOTE_F5,8,  NOTE_A5,4,  NOTE_G5,8,  NOTE_F5,8,
-  NOTE_E5, -4,  NOTE_C5,8,  NOTE_E5,4,  NOTE_D5,8,  NOTE_C5,8,
-  NOTE_B4, 4,  NOTE_B4,8,  NOTE_C5,8,  NOTE_D5,4,  NOTE_E5,4,
-  NOTE_C5, 4,  NOTE_A4,4,  NOTE_A4,4, REST, 4,
+  NOTE_AS4,4,  NOTE_F4,-4,  NOTE_AS4,8,  NOTE_AS4,16,  NOTE_C5,16, NOTE_D5,16, NOTE_DS5,16,//7
+  NOTE_F5,2,  NOTE_F5,8,  NOTE_F5,8,  NOTE_F5,8,  NOTE_FS5,16, NOTE_GS5,16,
+  NOTE_AS5,-2,  NOTE_AS5,8,  NOTE_AS5,8,  NOTE_GS5,8,  NOTE_FS5,16,
+  NOTE_GS5,-8,  NOTE_FS5,16,  NOTE_F5,2,  NOTE_F5,4, 
 
-  NOTE_E5, 4,  NOTE_B4,8,  NOTE_C5,8,  NOTE_D5,4,  NOTE_C5,8,  NOTE_B4,8,
-  NOTE_A4, 4,  NOTE_A4,8,  NOTE_C5,8,  NOTE_E5,4,  NOTE_D5,8,  NOTE_C5,8,
-  NOTE_B4, -4,  NOTE_C5,8,  NOTE_D5,4,  NOTE_E5,4,
-  NOTE_C5, 4,  NOTE_A4,4,  NOTE_A4,8,  NOTE_A4,4,  NOTE_B4,8,  NOTE_C5,8,
+  NOTE_DS5,-8, NOTE_F5,16, NOTE_FS5,2, NOTE_F5,8, NOTE_DS5,8, //11
+  NOTE_CS5,-8, NOTE_DS5,16, NOTE_F5,2, NOTE_DS5,8, NOTE_CS5,8,
+  NOTE_C5,-8, NOTE_D5,16, NOTE_E5,2, NOTE_G5,8, 
+  NOTE_F5,16, NOTE_F4,16, NOTE_F4,16, NOTE_F4,16,NOTE_F4,16,NOTE_F4,16,NOTE_F4,16,NOTE_F4,16,NOTE_F4,8, NOTE_F4,16,NOTE_F4,8,
 
-  NOTE_D5, -4,  NOTE_F5,8,  NOTE_A5,4,  NOTE_G5,8,  NOTE_F5,8,
-  NOTE_E5, -4,  NOTE_C5,8,  NOTE_E5,4,  NOTE_D5,8,  NOTE_C5,8,
-  NOTE_B4, 4,  NOTE_B4,8,  NOTE_C5,8,  NOTE_D5,4,  NOTE_E5,4,
-  NOTE_C5, 4,  NOTE_A4,4,  NOTE_A4,4, REST, 4,
-  
-
-  NOTE_E5,2,  NOTE_C5,2,
-  NOTE_D5,2,   NOTE_B4,2,
-  NOTE_C5,2,   NOTE_A4,2,
-  NOTE_GS4,2,  NOTE_B4,4,  REST,8, 
-  NOTE_E5,2,   NOTE_C5,2,
-  NOTE_D5,2,   NOTE_B4,2,
-  NOTE_C5,4,   NOTE_E5,4,  NOTE_A5,2,
-  NOTE_GS5,2,
 };
 
+int melody_maybe[] = {
+  
+  // Pacman
+  // Score available at https://musescore.com/user/85429/scores/107109
+  NOTE_B4, 16, NOTE_B5, 16, NOTE_FS5, 16, NOTE_DS5, 16, //1
+  NOTE_B5, 32, NOTE_FS5, -16, NOTE_DS5, 8, NOTE_C5, 16,
+  NOTE_C6, 16, NOTE_G6, 16, NOTE_E6, 16, NOTE_C6, 32, NOTE_G6, -16, NOTE_E6, 8,
+
+  NOTE_B4, 16,  NOTE_B5, 16,  NOTE_FS5, 16,   NOTE_DS5, 16,  NOTE_B5, 32,  //2
+  NOTE_FS5, -16, NOTE_DS5, 8,  NOTE_DS5, 32, NOTE_E5, 32,  NOTE_F5, 32,
+  NOTE_F5, 32,  NOTE_FS5, 32,  NOTE_G5, 32,  NOTE_G5, 32, NOTE_GS5, 32,  NOTE_A5, 16, NOTE_B5, 8
+  
+};
+
+const int melody_bad[] PROGMEM = {
+
+  // At Doom's Gate (E1M1)
+  // Score available at https://musescore.com/pieridot/doom
+
+  NOTE_E2, 8, NOTE_E2, 8, NOTE_E3, 8, NOTE_E2, 8, NOTE_E2, 8, NOTE_D3, 8, NOTE_E2, 8, NOTE_E2, 8, //1
+  NOTE_C3, 8, NOTE_E2, 8, NOTE_E2, 8, NOTE_AS2, 8, NOTE_E2, 8, NOTE_E2, 8, NOTE_B2, 8, NOTE_C3, 8,
+  NOTE_E2, 8, NOTE_E2, 8, NOTE_E3, 8, NOTE_E2, 8, NOTE_E2, 8, NOTE_D3, 8, NOTE_E2, 8, NOTE_E2, 8,
+  NOTE_C3, 8, NOTE_E2, 8, NOTE_E2, 8, NOTE_AS2, -2,
+
+  NOTE_E2, 8, NOTE_E2, 8, NOTE_E3, 8, NOTE_E2, 8, NOTE_E2, 8, NOTE_D3, 8, NOTE_E2, 8, NOTE_E2, 8, //13
+  NOTE_C3, 8, NOTE_E2, 8, NOTE_E2, 8, NOTE_AS2, 8, NOTE_E2, 8, NOTE_E2, 8, NOTE_B2, 8, NOTE_C3, 8,
+  NOTE_E2, 8, NOTE_E2, 8, NOTE_E3, 8, NOTE_E2, 8, NOTE_E2, 8, NOTE_D3, 8, NOTE_E2, 8, NOTE_E2, 8,
+  NOTE_FS3, -16, NOTE_D3, -16, NOTE_B2, -16, NOTE_A3, -16, NOTE_FS3, -16, NOTE_B2, -16, NOTE_D3, -16, NOTE_FS3, -16, NOTE_A3, -16, NOTE_FS3, -16, NOTE_D3, -16, NOTE_B2, -16,
+};
 
 const char *mqtt_broker = "broker.emqx.io";  // EMQX broker endpoint
 
 const char *mqtt_topic_temperature_room = "home/room/temperature";
 const char *mqtt_topic_temperature_hall = "home/hall/temperature";
 const char *mqtt_topic_actuators = "home/actuators";
+const char *mqtt_topic_extern = "extern/";
 
 const char *mqtt_username = username;  // MQTT username for authentication
 const char *mqtt_password = password_mqtt;  // MQTT password for authentication
@@ -56,9 +67,13 @@ const int mqtt_port = 1883;  // MQTT port (TCP)
 const int mqttpayloadSize = 100;
 char mqttpayload_room_temp [mqttpayloadSize] = {'\0'};
 char mqttpayload_hall_temp [mqttpayloadSize] = {'\0'};
-char mqttpayload_actuators [mqttpayloadSize] = {'\0'};
+char mqttpayload_extern [mqttpayloadSize] = {'\0'};
 WiFiClient espClient;
 PubSubClient mqtt_client(espClient);
+
+bool good = 0;
+bool maybe = 0;
+bool bad = 0;
 
 void connectToWiFi();
 
@@ -90,13 +105,14 @@ void connectToWiFi() {
 
 void connectToMQTTBroker() {
     while (!mqtt_client.connected()) {
-        String client_id = "esp32 actuators" + String(WiFi.macAddress());
+        String client_id = "esp32 actuators board" + String(WiFi.macAddress());
         Serial.printf("Connecting to MQTT Broker as %s.....\n", client_id.c_str());
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
             mqtt_client.subscribe(mqtt_topic_temperature_room);
             mqtt_client.subscribe(mqtt_topic_temperature_hall);
-            mqtt_client.subscribe(mqtt_topic_actuators);            
+            mqtt_client.subscribe(mqtt_topic_actuators);
+            mqtt_client.subscribe(mqtt_topic_extern);
             
             // Publish message upon successful connection
             // mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP32 Actuators ^^");
@@ -112,20 +128,21 @@ void connectToMQTTBroker() {
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
     mqttpayload_room_temp [mqttpayloadSize] = {'\0'};
     mqttpayload_hall_temp [mqttpayloadSize] = {'\0'};
-    mqttpayload_actuators [mqttpayloadSize] = {'\0'};
+    mqttpayload_extern [mqttpayloadSize] = {'\0'};
 
-    Serial.print("Message received on topic: ");
-    Serial.println(topic);
-    Serial.print("Message:");
+    // Debuging Messages
+    // Serial.print("Message received on topic: ");
+    // Serial.println(topic);
+    // Serial.print("Message:");
 
-    for (unsigned int i = 0; i < length; i++) {
-        Serial.print((char) payload[i]);
-    }
+    //for (unsigned int i = 0; i < length; i++) {
+    //    Serial.print((char) payload[i]);
+    //}
     
-    Serial.println();
+    //Serial.println();
 
-    if (strcmp(topic, "home/actuators") == 0){
-          memcpy(mqttpayload_actuators, payload, length);
+    if (strcmp(topic, "extern/") == 0){
+          memcpy(mqttpayload_extern, payload, length);
     }
 
     if (!strcmp(topic, "home/room/temperature") == 0){
@@ -135,17 +152,15 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     if (!strcmp(topic, "home/hall/temperature") == 0){
           memcpy(mqttpayload_hall_temp, payload, length);
     }
-    Serial.println();
-    Serial.println("-----------------------");
+    
+    //Serial.println();
+    //Serial.println("-----------------------");
 }
 
-int notes = sizeof(melody) / sizeof(melody[0]) / 2;
-
-int tempo = 144;
-
-// this calculates the duration of a whole note in ms
-int wholenote = (60000 * 4) / tempo;
-
+// Song Parameters
+int notes = 0;
+int tempo = 0;
+int wholenote = 0;
 int divider = 0, noteDuration = 0;
 
 void loop() {
@@ -155,59 +170,128 @@ void loop() {
 
   mqtt_client.loop();
 
-  Serial.println (mqttpayload_actuators);
-  if (strstr(mqttpayload_actuators, "OPEN") != NULL) {
-    setColor(0,255,0);
+  float home_temp = (atoi(mqttpayload_room_temp) + atoi(mqttpayload_hall_temp))/2;
+
+  if (strstr(mqttpayload_extern, "GOOD") != NULL) {
+      if (home_temp > 24 || home_temp < 14){
+      setColor(0,255,0);
+      mqtt_client.publish(mqtt_topic_actuators, "WINDOWS OPEN");
+
+      if (good == 0){
+        good = 1;
+        maybe = 0;
+        bad = 0;
+
+        tempo = 88;
+        notes = sizeof(melody_good) / sizeof(melody_good[0]) / 2;
+        wholenote = (60000 * 4) / tempo;
+        divider = 0, noteDuration = 0;
+        for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
+
+            // calculates the duration of each note
+            divider = melody_good[thisNote + 1];
+            if (divider > 0) {
+              // regular note, just proceed
+              noteDuration = (wholenote) / divider;
+            } else if (divider < 0) {
+              // dotted notes are represented with negative durations!!
+              noteDuration = (wholenote) / abs(divider);
+              noteDuration *= 1.5; // increases the duration in half for dotted notes
+            }
+
+            // we only play the note for 90% of the duration, leaving 10% as a pause
+            tone(BUZZER_PIN, melody_good[thisNote], noteDuration*0.9);
+
+            // Wait for the specief duration before playing the next note.
+            delay(noteDuration);
+            
+            // stop the waveform generation before the next note.
+            noTone(BUZZER_PIN);
+          }
+      }
+    }
+  } else if (strstr(mqttpayload_extern, "MAYBE") != NULL) {
+      if (home_temp > 24 || home_temp < 14){
+
+        setColor(255,255,0);
+        mqtt_client.publish(mqtt_topic_actuators, "MAYBE WINDOWS OPEN");
+
+        if (maybe == 0){
+          maybe = 1;
+          good = 0;
+          bad = 0;
+
+          tempo = 105;
+          notes = sizeof(melody_maybe) / sizeof(melody_maybe[0]) / 2;
+          wholenote = (60000 * 4) / tempo;
+          divider = 0, noteDuration = 0;
+          for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
+
+              // calculates the duration of each note
+              divider = melody_maybe[thisNote + 1];
+              if (divider > 0) {
+                // regular note, just proceed
+                noteDuration = (wholenote) / divider;
+              } else if (divider < 0) {
+                // dotted notes are represented with negative durations!!
+                noteDuration = (wholenote) / abs(divider);
+                noteDuration *= 1.5; // increases the duration in half for dotted notes
+              }
+
+              // we only play the note for 90% of the duration, leaving 10% as a pause
+              tone(BUZZER_PIN, melody_maybe[thisNote], noteDuration * 0.9);
+
+              // Wait for the specief duration before playing the next note.
+              delay(noteDuration);
+
+              // stop the waveform generation before the next note.
+              noTone(BUZZER_PIN);
+            }
+        }
+    }
+  } else if (strstr(mqttpayload_extern, "BAD") != NULL ) {
+      if (home_temp < 31){
+        setColor(255,0,0);
+        mqtt_client.publish(mqtt_topic_actuators, "WINDOWS CLOSED");
+
+        if (bad == 0) {
+          good = 0;
+          maybe = 0;
+          bad = 1;
+
+          tempo = 225;
+          notes = sizeof(melody_bad) / sizeof(melody_bad[0]) / 2;
+          wholenote = (60000 * 4) / tempo;
+          divider = 0, noteDuration = 0;
+
+          for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
+
+              // calculates the duration of each note
+              divider = pgm_read_word_near(melody_bad+thisNote + 1);
+              if (divider > 0) {
+                // regular note, just proceed
+                noteDuration = (wholenote) / divider;
+              } else if (divider < 0) {
+                // dotted notes are represented with negative durations!!
+                noteDuration = (wholenote) / abs(divider);
+                noteDuration *= 1.5; // increases the duration in half for dotted notes
+              }
+
+              // we only play the note for 90% of the duration, leaving 10% as a pause
+              tone(BUZZER_PIN, pgm_read_word_near(melody_bad+thisNote), noteDuration * 0.9);
+
+              // Wait for the specief duration before playing the next note.
+              delay(noteDuration);
+
+              // stop the waveform generation before the next note.
+              noTone(BUZZER_PIN);
+          } 
+      }
+    }
   } else {
-    setColor(255,0,0);
-  }
-  delay(1000);
-
-  //delay(3000); // keep the color 1 second
-
-  // color code #F7788A (R = 247, G = 120, B = 138)
-  //setColor(0, 255, 0);
-
-  //delay(3000); // keep the color 1 second
-
-  // color code #34A853 (R = 52,  G = 168, B = 83)
-  //setColor(0, 0, 255);
-
-  //delay(3000); // keep the color 1 second
-
-  // song
-  // for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
-
-  //   // calculates the duration of each note
-  //   divider = melody[thisNote + 1];
-  //   if (divider > 0) {
-  //     // regular note, just proceed
-  //     noteDuration = (wholenote) / divider;
-  //   } else if (divider < 0) {
-  //     // dotted notes are represented with negative durations!!
-  //     noteDuration = (wholenote) / abs(divider);
-  //     noteDuration *= 1.5; // increases the duration in half for dotted notes
-  //   }
-
-  //   // we only play the note for 90% of the duration, leaving 10% as a pause
-  //   tone(BUZZER_PIN, melody[thisNote], noteDuration*0.9);
-
-  //   // Wait for the specief duration before playing the next note.
-  //   delay(noteDuration);
-    
-  //   // stop the waveform generation before the next note.
-  //   noTone(BUZZER_PIN);
-  // }
-
-
-  // for (int thisNote = 0; thisNote < sizeof(melody); thisNote++) {
-  //   int noteDuration = 1000; // noteDurations[thisNote];
-  //   tone(BUZZER_PIN, melody[thisNote], noteDuration);
-
-  //   int pauseBetweenNotes = noteDuration * 1.30;
-  //   delay(pauseBetweenNotes);
-  //   noTone(BUZZER_PIN);
-  // }
+    setColor(0,0,255);
+  } 
+  delay(3000);
 }
 
 void setColor(int R, int G, int B) {

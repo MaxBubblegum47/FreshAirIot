@@ -21,7 +21,7 @@
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define MIN_VALUE 25
 #define MAX_VALUE 800
-#define REPORT_INTERVAL 1
+#define REPORT_INTERVAL 3
 #define MAX 100 
 
 Adafruit_BME680 bme; // I2C
@@ -48,7 +48,7 @@ const char *mqtt_topic_humidity = "home/room/window/humidity";
 const char *mqtt_topic_airquality = "home/room/window/airquality";
 const char *mqtt_topic_light = "home/room/window/light";
 const char *mqtt_topic_height = "home/room/window/height";
-const char *mqtt_topic_actuators = "home/actuators";
+const char *mqtt_topic_extern = "extern/";
 
 const char *mqtt_username = username;  // MQTT username for authentication
 const char *mqtt_password = password_mqtt;  // MQTT password for authentication
@@ -111,7 +111,7 @@ void connectToMQTTBroker() {
             mqtt_client.subscribe(mqtt_topic_airquality);
             mqtt_client.subscribe(mqtt_topic_light);
             mqtt_client.subscribe(mqtt_topic_height);
-            mqtt_client.subscribe(mqtt_topic_actuators);
+            mqtt_client.subscribe(mqtt_topic_extern);
 
             // Publish message upon successful connection
             // mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP8266 Window Room ^^");
@@ -257,24 +257,24 @@ void loop() {
   }
   
   // External Condition Calculation
-  String actuators_message = "";
+  String extern_message = "BAD";
 
   if (strcmp (aqs.c_str(), "Good") == 0 || strcmp (aqs.c_str(), "Moderate") == 0){
     if (bme.pressure > 100000) {
         if (bme.temperature > 12 && bme.temperature < 29){
           if  (bme.humidity < 60){
-            actuators_message = "OPEN";
+            extern_message = "GOOD";
           } else {
-            actuators_message = "MAYBE OPEN";
+            extern_message = "MAYBE";
           }
-        } else {
-          actuators_message = "CLOSE";
+        } else if (bme.temperature < 30 && bme.humidity < 60){
+          extern_message = "MAYBE";
         }
     } else {
-      actuators_message = "CLOSE";
+      extern_message = "BAD";
     }
   } else {
-    actuators_message = "CLOSE";
+    extern_message = "BAD";
   }
 
   // MQTT Publish Messages
@@ -284,10 +284,10 @@ void loop() {
   mqtt_client.publish(mqtt_topic_humidity, String(bme.humidity).c_str());
   mqtt_client.publish(mqtt_topic_temperature, String(bme.temperature).c_str());
   mqtt_client.publish(mqtt_topic_height, String(bme.readAltitude(SEALEVELPRESSURE_HPA)).c_str());
-  mqtt_client.publish(mqtt_topic_actuators, actuators_message.c_str());
+  mqtt_client.publish(mqtt_topic_extern, extern_message.c_str());
 
 
-  delay(1000 * 10 * REPORT_INTERVAL);
+  delay(1000 * REPORT_INTERVAL);
 
   }
 

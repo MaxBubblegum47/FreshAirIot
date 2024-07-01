@@ -54,3 +54,4 @@ dkms.conf
 # Wifi Credentials
 WifiPassword.h
 mqttCredentials.h
+openweather_api_key.h

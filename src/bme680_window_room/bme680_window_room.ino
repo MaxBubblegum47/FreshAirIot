@@ -21,7 +21,7 @@
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define MIN_VALUE 25
 #define MAX_VALUE 800
-#define REPORT_INTERVAL 3
+#define REPORT_INTERVAL 1
 #define MAX 100 
 
 Adafruit_BME680 bme; // I2C
@@ -287,7 +287,7 @@ void loop() {
   mqtt_client.publish(mqtt_topic_extern, extern_message.c_str());
 
 
-  delay(1000 * REPORT_INTERVAL);
+  delay(100);
 
   }
 

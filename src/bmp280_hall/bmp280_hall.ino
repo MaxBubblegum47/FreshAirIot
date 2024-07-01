@@ -66,7 +66,7 @@ void connectToWiFi() {
 
 void connectToMQTTBroker() {
     while (!mqtt_client.connected()) {
-        String client_id = "esp8266-client-" + String(WiFi.macAddress());
+        String client_id = "esp8266-client-hall " + String(WiFi.macAddress());
         Serial.printf("Connecting to MQTT Broker as %s.....\n", client_id.c_str());
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
@@ -106,19 +106,24 @@ void loop() {
   // mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP8266 from Lorenzo's hall");
 
 
-  Serial.print("Temperature = ");
+  Serial.println();
+  Serial.println("---------------------------------------------------/\n");
+
+
+  Serial.print("Hall Temperature = ");
   Serial.print(bme.readTemperature());
   Serial.println(" *C");
   
-  Serial.print("Pressure = ");
+  Serial.print("Hall Pressure = ");
   Serial.print(bme.readPressure());
   Serial.println(" Pa");
   
-  Serial.print("Approx altitude = ");
+  Serial.print("Hall Approx altitude = ");
   Serial.print(bme.readAltitude(1013.25)); // this should be adjusted to your local forcase
   Serial.println(" m");
   
   Serial.println();
+  Serial.println("---------------------------------------------------/\n");
 
   mqtt_client.publish(mqtt_topic_pressure, String(bme.readPressure()).c_str());
   mqtt_client.publish(mqtt_topic_temperature, String(bme.readTemperature()).c_str());

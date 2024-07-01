@@ -60,14 +60,18 @@ const char *mqtt_topic_temperature_room = "home/room/temperature";
 const char *mqtt_topic_temperature_hall = "home/hall/temperature";
 const char *mqtt_topic_actuators = "home/actuators";
 const char *mqtt_topic_extern = "extern/";
+const char *mqtt_topic_weather = "weather/";
+
 
 const char *mqtt_username = username;  // MQTT username for authentication
 const char *mqtt_password = password_mqtt;  // MQTT password for authentication
 const int mqtt_port = 1883;  // MQTT port (TCP)
-const int mqttpayloadSize = 100;
-char mqttpayload_room_temp [mqttpayloadSize] = {'\0'};
-char mqttpayload_hall_temp [mqttpayloadSize] = {'\0'};
-char mqttpayload_extern [mqttpayloadSize] = {'\0'};
+
+String mqttpayload_extern = "";
+String mqttpayload_room_temp = "";
+String mqttpayload_hall_temp = "";
+String mqttpayload_weather = "";
+
 WiFiClient espClient;
 PubSubClient mqtt_client(espClient);
 
@@ -83,6 +87,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length);
 
 void setup() {
   Serial.begin(9600);
+
   pinMode(PIN_RED,   OUTPUT);
   pinMode(PIN_GREEN, OUTPUT);
   pinMode(PIN_BLUE,  OUTPUT);
@@ -105,7 +110,7 @@ void connectToWiFi() {
 
 void connectToMQTTBroker() {
     while (!mqtt_client.connected()) {
-        String client_id = "esp32 actuators board" + String(WiFi.macAddress());
+        String client_id = "esp32 actuators board " + String(WiFi.macAddress());
         Serial.printf("Connecting to MQTT Broker as %s.....\n", client_id.c_str());
         if (mqtt_client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Connected to MQTT broker");
@@ -113,6 +118,8 @@ void connectToMQTTBroker() {
             mqtt_client.subscribe(mqtt_topic_temperature_hall);
             mqtt_client.subscribe(mqtt_topic_actuators);
             mqtt_client.subscribe(mqtt_topic_extern);
+            mqtt_client.subscribe(mqtt_topic_weather);
+
             
             // Publish message upon successful connection
             // mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP32 Actuators ^^");
@@ -126,35 +133,57 @@ void connectToMQTTBroker() {
 }
 
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
-    mqttpayload_room_temp [mqttpayloadSize] = {'\0'};
-    mqttpayload_hall_temp [mqttpayloadSize] = {'\0'};
-    mqttpayload_extern [mqttpayloadSize] = {'\0'};
+    // mqttpayload_room_temp [mqttpayloadSize] = {'\8'};
+    // mqttpayload_hall_temp [mqttpayloadSize] = {'\8'};
+    // mqttpayload_extern [mqttpayloadSize] = {'\0'};
+    // mqttpayload_weather [mqttpayloadSize] = {'\0'};
 
     // Debuging Messages
-    // Serial.print("Message received on topic: ");
-    // Serial.println(topic);
-    // Serial.print("Message:");
-
-    //for (unsigned int i = 0; i < length; i++) {
-    //    Serial.print((char) payload[i]);
-    //}
-    
-    //Serial.println();
+    Serial.print("Message received on topic: ");
+    Serial.println(topic);
+    Serial.print("Message:");
 
     if (strcmp(topic, "extern/") == 0){
-          memcpy(mqttpayload_extern, payload, length);
+      mqttpayload_extern = "";
+      //Serial.println("Sono dentro extern\n");
+      for (unsigned int i = 0; i < length; i++) {
+        Serial.print((char) payload[i]);
+        mqttpayload_extern.concat((char) payload[i]);
+      }
     }
 
-    if (!strcmp(topic, "home/room/temperature") == 0){
-          memcpy(mqttpayload_room_temp, payload, length);
+    if (strcmp(topic, "home/room/temperature")== 0){
+      mqttpayload_room_temp = "";
+      //Serial.println("Sono dentro room temp\n");
+      for (unsigned int i = 0; i < length; i++) {
+        Serial.print((char) payload[i]);
+        mqttpayload_room_temp.concat((char) payload[i]);
+
+      }
+    }
+    Serial.println();
+
+    if (strcmp(topic, "home/hall/temperature")== 0){
+      mqttpayload_hall_temp = "";
+      //Serial.println("Sono dentro hall temp\n");
+      for (unsigned int i = 0; i < length; i++) {
+        Serial.print((char) payload[i]);
+        mqttpayload_hall_temp.concat((char) payload[i]);
+      }
+    }
+   Serial.println();
+
+    if (strcmp(topic, "weather/")== 0){
+      mqttpayload_weather = "";
+      //Serial.println("Sono dentro weather\n");
+      for (unsigned int i = 0; i < length; i++) {
+        Serial.print((char) payload[i]);
+        mqttpayload_weather.concat((char) payload[i]);
+      }
     }
 
-    if (!strcmp(topic, "home/hall/temperature") == 0){
-          memcpy(mqttpayload_hall_temp, payload, length);
-    }
-    
-    //Serial.println();
-    //Serial.println("-----------------------");
+    Serial.println();
+    Serial.println("-----------------------");
 }
 
 // Song Parameters
@@ -170,9 +199,29 @@ void loop() {
 
   mqtt_client.loop();
 
-  float home_temp = (atoi(mqttpayload_room_temp) + atoi(mqttpayload_hall_temp))/2;
+  float home_temp = (mqttpayload_room_temp.toFloat() + mqttpayload_hall_temp.toFloat())/2;
+  
+  // Debugging Print
+  // Serial.println("Final values recorded (extern, room temp, hall tempo, weather forecast 1 day): \n");
+  // Serial.println(mqttpayload_extern);
+  // Serial.println();
+  // Serial.println(mqttpayload_room_temp);
+  // Serial.println();
+  // Serial.println(mqttpayload_hall_temp);
+  // Serial.println();
+  // Serial.println(mqttpayload_weather);
+  // Serial.println();
+  // Serial.println("-----------------------");
 
-  if (strstr(mqttpayload_extern, "GOOD") != NULL) {
+  if (strstr(mqttpayload_weather.c_str(), "rain")){
+      //Serial.println("Tomorrow is goin to rain: ");
+      for (int i = 0; i < 3; i++){
+        setColor(0,0,255);
+        delay(1000); 
+       }         
+  }
+
+  if (strstr(mqttpayload_extern.c_str(), "GOOD") != NULL) {
       if (home_temp > 24 || home_temp < 14){
       setColor(0,255,0);
       mqtt_client.publish(mqtt_topic_actuators, "WINDOWS OPEN");
@@ -210,7 +259,7 @@ void loop() {
           }
       }
     }
-  } else if (strstr(mqttpayload_extern, "MAYBE") != NULL) {
+  } else if (strstr(mqttpayload_extern.c_str(), "MAYBE") != NULL) {
       if (home_temp > 24 || home_temp < 14){
 
         setColor(255,255,0);
@@ -249,7 +298,7 @@ void loop() {
             }
         }
     }
-  } else if (strstr(mqttpayload_extern, "BAD") != NULL ) {
+  } else if (strstr(mqttpayload_extern.c_str(), "BAD") != NULL ) {
       if (home_temp < 31){
         setColor(255,0,0);
         mqtt_client.publish(mqtt_topic_actuators, "WINDOWS CLOSED");
@@ -289,7 +338,7 @@ void loop() {
       }
     }
   } else {
-    setColor(0,0,255);
+    setColor(0,0,0);
   } 
   delay(3000);
 }

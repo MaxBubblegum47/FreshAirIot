@@ -105,18 +105,23 @@ void loop() {
   mqtt_client.loop();
   // mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP8266 from Lorenzo's Room");
 
+  Serial.println();
+  Serial.println("---------------------------------------------------/\n");
 
-  Serial.print("Temperature = ");
+  Serial.print("Room Temperature = ");
   Serial.print(bme.readTemperature());
   Serial.println(" *C");
   
-  Serial.print("Pressure = ");
+  Serial.print("Room Pressure = ");
   Serial.print(bme.readPressure());
   Serial.println(" Pa");
   
-  Serial.print("Approx altitude = ");
+  Serial.print("Room Approx altitude = ");
   Serial.print(bme.readAltitude(1013.25)); // this should be adjusted to your local forcase
   Serial.println(" m");
+
+  Serial.println();
+  Serial.println("---------------------------------------------------/\n");
   
   Serial.println();
 
@@ -124,6 +129,5 @@ void loop() {
   mqtt_client.publish(mqtt_topic_temperature, String(bme.readTemperature()).c_str());
   mqtt_client.publish(mqtt_topic_height, String(bme.readAltitude(SEALEVELPRESSURE_HPA)).c_str());
 
-
-  delay(10000);
+  delay(1000);
 }

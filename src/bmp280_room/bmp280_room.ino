@@ -129,5 +129,5 @@ void loop() {
   mqtt_client.publish(mqtt_topic_temperature, String(bme.readTemperature()).c_str());
   mqtt_client.publish(mqtt_topic_height, String(bme.readAltitude(SEALEVELPRESSURE_HPA)).c_str());
 
-  delay(1000);
+  delay(10000);
 }

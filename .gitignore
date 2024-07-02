@@ -55,3 +55,4 @@ dkms.conf
 WifiPassword.h
 mqttCredentials.h
 openweather_api_key.h
+telegrambotCredentials.h

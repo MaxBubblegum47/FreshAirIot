@@ -14,6 +14,12 @@
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
+#include <WiFiClientSecure.h>
+#include <UniversalTelegramBot.h>
+#include "telegrambotCredentials.h"
+
+// #define BOTtoken "7252474532:AAHUlYQnSZt9hoN_IlRK7RgqY0zQRg3oEtM"
+// #define CHAT_ID "33523022"
 
 const char *mqtt_broker = "broker.emqx.io";  // EMQX broker endpoint
 const char *mqtt_topic_temperature = "home/hall/temperature";
@@ -24,7 +30,8 @@ const char *mqtt_topic_weather = "weather/";
 const char *mqtt_username = username;  // MQTT username for authentication
 const char *mqtt_password = password_mqtt;  // MQTT password for authentication
 const int mqtt_port = 1883;  // MQTT port (TCP)
-
+const char BotToken[] = BotToken;
+const char ChatID[] = ChatID;
 // BMP280 Sensor Settings
 #define BMP_SCK 13
 #define BMP_MISO 12
@@ -37,28 +44,12 @@ Adafruit_BMP280 bme;
 
 // initiate the client
 OpenWeatherMapForecast client;
-
-// See https://docs.thingpulse.com/how-tos/openweathermap-key/
 String OPEN_WEATHER_MAP_APP_ID = open_weather_api_key;
-/*
-Go to https://openweathermap.org/find?q= and search for a location. Go through the
-result set and select the entry closest to the actual location you want to display 
-data for. It'll be a URL like https://openweathermap.org/city/2657896. The number
-at the end is what you assign to the constant below.
- */
 String OPEN_WEATHER_MAP_LOCATION_ID = "3181903";
-/*
-Arabic - ar, Bulgarian - bg, Catalan - ca, Czech - cz, German - de, Greek - el,
-English - en, Persian (Farsi) - fa, Finnish - fi, French - fr, Galician - gl,
-Croatian - hr, Hungarian - hu, Italian - it, Japanese - ja, Korean - kr,
-Latvian - la, Lithuanian - lt, Macedonian - mk, Dutch - nl, Polish - pl,
-Portuguese - pt, Romanian - ro, Russian - ru, Swedish - se, Slovak - sk,
-Slovenian - sl, Spanish - es, Turkish - tr, Ukrainian - ua, Vietnamese - vi,
-Chinese Simplified - zh_cn, Chinese Traditional - zh_tw.
-*/
 String OPEN_WEATHER_MAP_LANGUAGE = "en";
 boolean IS_METRIC = false;
-uint8_t MAX_FORECASTS = 15;
+uint8_t MAX_FORECASTS = 3;
+bool rain_notification = false;
 
 /**
  * WiFi Settings
@@ -73,7 +64,11 @@ const char* WIFI_PASSWORD = password;
 
 // initiate the WifiClient
 WiFiClient wifiClient;
+WiFiClientSecure wifiClientSecure;
 PubSubClient mqtt_client(wifiClient);
+
+// X509List cert(TELEGRAM_CERTIFICATE_ROOT);
+UniversalTelegramBot bot(BotToken, wifiClientSecure); 
 
 /**
  * SETUP
@@ -83,6 +78,9 @@ void setup() {
   Serial.begin(115200);
   delay(500);
   connectWifi();
+
+  //configTime(0, 0, "pool.ntp.org");      // get UTC time via NTP
+  //wifiClient.setTrustAnchors(&cert); // Add root certificate for api.telegram.org
 
   // Starting mqtt
   mqtt_client.setServer(mqtt_broker, mqtt_port);
@@ -94,6 +92,8 @@ void setup() {
     Serial.println("Could not find a valid BMP280 sensor, check wiring!");
     while (1);
   }
+
+  wifiClientSecure.setInsecure();
 
   Serial.println();
 }
@@ -217,6 +217,14 @@ void loop() {
   }
 
   mqtt_client.publish(mqtt_topic_weather, description_forecast[0]);
+
+  if (strstr(description_forecast[0], "rain") != NULL && rain_notification == false) {
+      bot.sendMessage(ChatID, "Hey I just wanted to tell you that tomorrow is going to rain, so the air will be better! :3","");
+      rain_notification = true;   
+  } else {
+    rain_notification = false;
+  }
+
   Serial.println();
   Serial.println("---------------------------------------------------/\n");
 
@@ -236,6 +244,7 @@ void loop() {
   Serial.println();
   Serial.println("---------------------------------------------------/\n");
 
+  Serial.println();
   mqtt_client.publish(mqtt_topic_pressure, String(bme.readPressure()).c_str());
   mqtt_client.publish(mqtt_topic_temperature, String(bme.readTemperature()).c_str());
   mqtt_client.publish(mqtt_topic_height, String(bme.readAltitude(SEALEVELPRESSURE_HPA)).c_str());

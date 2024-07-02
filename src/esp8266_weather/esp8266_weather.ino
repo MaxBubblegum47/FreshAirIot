@@ -18,9 +18,6 @@
 #include <UniversalTelegramBot.h>
 #include "telegrambotCredentials.h"
 
-// #define BOTtoken "7252474532:AAHUlYQnSZt9hoN_IlRK7RgqY0zQRg3oEtM"
-// #define CHAT_ID "33523022"
-
 const char *mqtt_broker = "broker.emqx.io";  // EMQX broker endpoint
 const char *mqtt_topic_temperature = "home/hall/temperature";
 const char *mqtt_topic_pressure = "home/hall/pressure";

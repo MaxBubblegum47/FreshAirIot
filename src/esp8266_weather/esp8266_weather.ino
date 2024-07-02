@@ -18,6 +18,7 @@
 #include <UniversalTelegramBot.h>
 #include "telegrambotCredentials.h"
 
+// MQTT Broker and topics Configuration
 const char *mqtt_broker = "broker.emqx.io";  // EMQX broker endpoint
 const char *mqtt_topic_temperature = "home/hall/temperature";
 const char *mqtt_topic_pressure = "home/hall/pressure";

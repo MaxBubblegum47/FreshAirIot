@@ -47,7 +47,7 @@ String OPEN_WEATHER_MAP_LOCATION_ID = "3181903";
 String OPEN_WEATHER_MAP_LANGUAGE = "en";
 boolean IS_METRIC = false;
 uint8_t MAX_FORECASTS = 3;
-bool rain_notification = false;
+String rain_notification = "not done";
 
 /**
  * WiFi Settings
@@ -215,12 +215,15 @@ void loop() {
   }
 
   mqtt_client.publish(mqtt_topic_weather, description_forecast[0]);
+    Serial.printf("\nSono fuori da ifelse: %s",rain_notification);
 
-  if (strstr(description_forecast[0], "rain") != NULL && rain_notification == false) {
+  if (strstr(description_forecast[0], "rain") != NULL && strcmp(rain_notification.c_str(), "not done") == 0) {
+      rain_notification = "done";   
       bot.sendMessage(chatidbot, "Hey I just wanted to tell you that tomorrow is going to rain, so the air will be better! :3","Markdown");
-      rain_notification = true;   
-  } else {
-    rain_notification = false;
+      Serial.printf("\nSono dentro ad if: %s",rain_notification);
+  } else if (strstr(description_forecast[0], "rain") == NULL) {
+    rain_notification = "not done";
+    Serial.printf("\nSono dentro ad else: %s",rain_notification);
   }
 
   Serial.println();

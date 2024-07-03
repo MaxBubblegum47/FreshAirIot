@@ -43,7 +43,7 @@ Adafruit_BMP280 bme;
 // initiate the client
 OpenWeatherMapForecast client;
 String OPEN_WEATHER_MAP_APP_ID = open_weather_api_key;
-String OPEN_WEATHER_MAP_LOCATION_ID = "3181903";
+String OPEN_WEATHER_MAP_LOCATION_ID = "3181903"; // Modena = 3173331, Bomporto = 3181903
 String OPEN_WEATHER_MAP_LANGUAGE = "en";
 boolean IS_METRIC = false;
 uint8_t MAX_FORECASTS = 3;

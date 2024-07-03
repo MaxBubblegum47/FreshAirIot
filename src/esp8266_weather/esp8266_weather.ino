@@ -215,15 +215,15 @@ void loop() {
   }
 
   mqtt_client.publish(mqtt_topic_weather, description_forecast[0]);
-    Serial.printf("\nSono fuori da ifelse: %s",rain_notification);
+  //Serial.printf("\nSono fuori da ifelse: %s",rain_notification);
 
   if (strstr(description_forecast[0], "rain") != NULL && strcmp(rain_notification.c_str(), "not done") == 0) {
       rain_notification = "done";   
       bot.sendMessage(chatidbot, "Hey I just wanted to tell you that tomorrow is going to rain, so the air will be better! :3","Markdown");
-      Serial.printf("\nSono dentro ad if: %s",rain_notification);
+      //Serial.printf("\nSono dentro ad if: %s",rain_notification);
   } else if (strstr(description_forecast[0], "rain") == NULL) {
     rain_notification = "not done";
-    Serial.printf("\nSono dentro ad else: %s",rain_notification);
+    //Serial.printf("\nSono dentro ad else: %s",rain_notification);
   }
 
   Serial.println();

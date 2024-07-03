@@ -28,8 +28,8 @@ const char *mqtt_topic_weather = "weather/";
 const char *mqtt_username = username;  // MQTT username for authentication
 const char *mqtt_password = password_mqtt;  // MQTT password for authentication
 const int mqtt_port = 1883;  // MQTT port (TCP)
-const char BotToken[] = BotToken;
-const char ChatID[] = ChatID;
+const char *bottoken = BotToken;
+const char *chatidbot = ChatID;
 // BMP280 Sensor Settings
 #define BMP_SCK 13
 #define BMP_MISO 12
@@ -66,7 +66,7 @@ WiFiClientSecure wifiClientSecure;
 PubSubClient mqtt_client(wifiClient);
 
 // X509List cert(TELEGRAM_CERTIFICATE_ROOT);
-UniversalTelegramBot bot(BotToken, wifiClientSecure); 
+UniversalTelegramBot bot(bottoken, wifiClientSecure); 
 
 /**
  * SETUP
@@ -217,7 +217,7 @@ void loop() {
   mqtt_client.publish(mqtt_topic_weather, description_forecast[0]);
 
   if (strstr(description_forecast[0], "rain") != NULL && rain_notification == false) {
-      bot.sendMessage(ChatID, "Hey I just wanted to tell you that tomorrow is going to rain, so the air will be better! :3","");
+      bot.sendMessage(chatidbot, "Hey I just wanted to tell you that tomorrow is going to rain, so the air will be better! :3","Markdown");
       rain_notification = true;   
   } else {
     rain_notification = false;

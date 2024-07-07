@@ -183,6 +183,15 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     }
 
     Serial.println();
+
+    if (strcmp(topic, "home/actuators")== 0){
+      //Serial.println("Sono dentro home/actuators\n");
+      for (unsigned int i = 0; i < length; i++) {
+        Serial.print((char) payload[i]);
+      }
+    }
+
+    Serial.println();
     Serial.println("-----------------------");
 }
 
@@ -217,7 +226,8 @@ void loop() {
       //Serial.println("Tomorrow is goin to rain: ");
       for (int i = 0; i < 3; i++){
         setColor(0,0,255);
-        delay(1000); 
+        delay(500);
+        setColor(255,255,255);
        }         
   }
 
@@ -340,7 +350,7 @@ void loop() {
   } else {
     setColor(0,0,0);
   } 
-  delay(3000);
+  delay(100);
 }
 
 void setColor(int R, int G, int B) {

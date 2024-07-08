@@ -1,8 +1,3 @@
-/***
-  Read Our Complete Guide: https://RandomNerdTutorials.com/esp8266-nodemcu-bme680-sensor-arduino/
-  Designed specifically to work with the Adafruit BME680 Breakout ----> http://www.adafruit.com/products/3660 These sensors use I2C or SPI to communicate, 2 or 4 pins are required to interface. Adafruit invests time and resources providing this open source code, please support Adafruit and open-source hardware by purchasing products from Adafruit! Written by Limor Fried & Kevin Townsend for Adafruit Industries. BSD license, all text above must be included in any redistribution
-***/
-
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
@@ -12,11 +7,6 @@
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 #include <stdio.h> 
-
-/*#define BME_SCK 14
-#define BME_MISO 12
-#define BME_MOSI 13
-#define BME_CS 15*/
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define MIN_VALUE 25
@@ -33,9 +23,10 @@ Adafruit_BME680 bme; // I2C
 float hum_weighting = 0.25; // so hum effect is 25% of the total air quality score
 float gas_weighting = 0.75; // so gas effect is 75% of the total air quality score
 
-float hum_score, gas_score;
+float hum_score, gas_score, temp_score;
 float gas_reference = 250000;
 float hum_reference = 40;
+float temp_reference = 21;
 int   getgasreference_count = 0;
 
 // MQTT Broker Configuration
@@ -192,14 +183,27 @@ void loop() {
 
   float current_humidity = bme.readHumidity();
   if (current_humidity >= 38 && current_humidity <= 42)
-    hum_score = 0.25*100; // Humidity +/-5% around optimum 
+    hum_score = 0.10*100; // Humidity +/-5% around optimum 
   else
   { //sub-optimal
     if (current_humidity < 38) 
-      hum_score = 0.25/hum_reference*current_humidity*100;
+      hum_score = 0.10/hum_reference*current_humidity*100;
     else
     {
-      hum_score = ((-0.25/(100-hum_reference)*current_humidity)+0.416666)*100;
+      hum_score = ((-0.10/(100-hum_reference)*current_humidity)+0.21)*100;
+    }
+  }
+
+  float current_temperature = bme.readTemperature();
+  if (current_temperature >= 14 && current_temperature <= 30)
+    temp_score = 0.10*100; // Temperature +/-5% around optimum 
+  else
+  { //sub-optimal
+    if (current_temperature < 14) 
+      temp_score = 0.10/temp_reference*current_temperature*100;
+    else
+    {
+      temp_score = ((-0.10/(100-temp_reference)*current_temperature)+0.21)*100;
     }
   }
   
@@ -208,14 +212,15 @@ void loop() {
   float gas_upper_limit = 50000;  // Good air quality limit 
   if (gas_reference > gas_upper_limit) gas_reference = gas_upper_limit;
   if (gas_reference < gas_lower_limit) gas_reference = gas_lower_limit;
-  gas_score = (0.75/(gas_upper_limit-gas_lower_limit)*gas_reference -(gas_lower_limit*(0.75/(gas_upper_limit-gas_lower_limit))))*100;
+  gas_score = (0.80/(gas_upper_limit-gas_lower_limit)*gas_reference -(gas_lower_limit*(0.80/(gas_upper_limit-gas_lower_limit))))*100;
   
   //Combine results for the final IAQ index value (0-100% where 100% is good quality air)
-  float air_quality_score = hum_score + gas_score;
+  float air_quality_score = hum_score + gas_score + temp_score;
 
-  Serial.println("Air Quality = "+String(air_quality_score,1)+"% derived from 25% of Humidity reading and 75% of Gas reading - 100% is good quality air");
-  Serial.println("Humidity element was : "+String(hum_score/100)+" of 0.25");
-  Serial.println("     Gas element was : "+String(gas_score/100)+" of 0.75");
+  Serial.println("Air Quality = "+String(air_quality_score,1)+"% derived from 10% of Humidity reading, 10% Temperature reading and 80% of Gas reading - 100% is good quality air");
+  Serial.println("Humidity element was : "+String(hum_score/100)+" of 0.10");
+  Serial.println("Temperature element was : "+String(hum_score/100)+" of 0.10");
+  Serial.println("Gas element was : "+String(gas_score/100)+" of 0.80");
   if (bme.readGas() < 120000) Serial.println("***** Poor air quality *****");
   Serial.println();
   if ((getgasreference_count++)%10==0) GetGasReference();
@@ -301,7 +306,7 @@ void loop() {
   gas_reference = gas_reference / readings;
 }
 
-  String CalculateIAQ(float score){
+String CalculateIAQ(float score){
   String IAQ_text = "";
   score = (100-score)*5;
   if      (score >= 301)                  IAQ_text += "Hazardous";
@@ -310,5 +315,6 @@ void loop() {
   else if (score >= 151 && score <= 175 ) IAQ_text += "Unhealthy for Sensitive Groups";
   else if (score >=  51 && score <= 150 ) IAQ_text += "Moderate";
   else if (score >=  00 && score <=  50 ) IAQ_text += "Good";
+  else IAQ_text += "DANGER";
   return IAQ_text;
 }

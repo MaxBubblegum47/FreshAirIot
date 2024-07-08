@@ -8,7 +8,7 @@ The air pollution is becoming more and more dangerous for the public health. Is 
 - specific rgb light that are visible on the board (green = open the window, yellow = you may consider to open the window, red = do not open the window)
 - specific music theme that are played by the board that are related with color of the rgb light (zelda's theme = green, pacman's theme = yellow, doom's theme = red)
 
-For what concerns the telegram notification there is a telegram bot that is always available and can provide the user some information about the current weather condition and forecasting up to 2 days. \newline
+For what concerns the telegram notification there is a telegram bot that is always available and can provide the user some information about the current weather condition and forecasting up to 2 days.
 The project is built using two types of boards:
 - ESP 8266
 - ESP 32

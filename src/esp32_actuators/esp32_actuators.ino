@@ -10,6 +10,11 @@
 #define PIN_GREEN  23 // GPIO22
 #define PIN_BLUE   18 // GPIO21
 
+int melody_danger[] = {
+  NOTE_AS4,4,  NOTE_F4,-4, NOTE_AS4,4,  NOTE_F4,-4,
+  NOTE_AS4,4,  NOTE_F4,-4, NOTE_AS4,4,  NOTE_F4,-4,
+};
+
 int melody_good[] = {
 
   NOTE_AS4,4,  NOTE_F4,-4,  NOTE_AS4,8,  NOTE_AS4,16,  NOTE_C5,16, NOTE_D5,16, NOTE_DS5,16,//7
@@ -268,10 +273,7 @@ void loop() {
             noTone(BUZZER_PIN);
           }
       }
-    }
-  } else if (strstr(mqttpayload_extern.c_str(), "MAYBE") != NULL) {
-      if (home_temp > 24 || home_temp < 14){
-
+    } else {
         setColor(255,255,0);
         mqtt_client.publish(mqtt_topic_actuators, "MAYBE WINDOWS OPEN");
 
@@ -308,8 +310,44 @@ void loop() {
             }
         }
     }
+  } else if (strstr(mqttpayload_extern.c_str(), "MAYBE") != NULL) {
+        setColor(255,255,0);
+        mqtt_client.publish(mqtt_topic_actuators, "MAYBE WINDOWS OPEN");
+
+        if (maybe == 0){
+          maybe = 1;
+          good = 0;
+          bad = 0;
+
+          tempo = 105;
+          notes = sizeof(melody_maybe) / sizeof(melody_maybe[0]) / 2;
+          wholenote = (60000 * 4) / tempo;
+          divider = 0, noteDuration = 0;
+          for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
+
+              // calculates the duration of each note
+              divider = melody_maybe[thisNote + 1];
+              if (divider > 0) {
+                // regular note, just proceed
+                noteDuration = (wholenote) / divider;
+              } else if (divider < 0) {
+                // dotted notes are represented with negative durations!!
+                noteDuration = (wholenote) / abs(divider);
+                noteDuration *= 1.5; // increases the duration in half for dotted notes
+              }
+
+              // we only play the note for 90% of the duration, leaving 10% as a pause
+              tone(BUZZER_PIN, melody_maybe[thisNote], noteDuration * 0.9);
+
+              // Wait for the specief duration before playing the next note.
+              delay(noteDuration);
+
+              // stop the waveform generation before the next note.
+              noTone(BUZZER_PIN);
+            }
+        }
   } else if (strstr(mqttpayload_extern.c_str(), "BAD") != NULL ) {
-      if (home_temp < 31){
+      if (home_temp < 33){
         setColor(255,0,0);
         mqtt_client.publish(mqtt_topic_actuators, "WINDOWS CLOSED");
 
@@ -346,10 +384,40 @@ void loop() {
               noTone(BUZZER_PIN);
           } 
       }
+    } else {
+        setColor(255,255,255);
+        mqtt_client.publish(mqtt_topic_actuators, "DANGER");
+
+        tempo = 88;
+        notes = sizeof(melody_danger) / sizeof(melody_danger[0]) / 2;
+        wholenote = (60000 * 4) / tempo;
+        divider = 0, noteDuration = 0;
+        for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
+
+          // calculates the duration of each note
+          divider = melody_danger[thisNote + 1];
+          if (divider > 0) {
+            // regular note, just proceed
+            noteDuration = (wholenote) / divider;
+          } else if (divider < 0) {
+            // dotted notes are represented with negative durations!!
+            noteDuration = (wholenote) / abs(divider);
+            noteDuration *= 1.5; // increases the duration in half for dotted notes
+          }
+
+          // we only play the note for 90% of the duration, leaving 10% as a pause
+          tone(BUZZER_PIN, melody_danger[thisNote], noteDuration*0.9);
+
+          // Wait for the specief duration before playing the next note.
+          delay(noteDuration);
+            
+          // stop the waveform generation before the next note.
+          noTone(BUZZER_PIN);
+        }
     }
   } else {
     setColor(0,0,0);
-  } 
+  }
   delay(100);
 }
 

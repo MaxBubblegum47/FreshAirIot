@@ -238,13 +238,15 @@ void loop() {
 
   if (strstr(mqttpayload_extern.c_str(), "GOOD") != NULL) {
       if (home_temp > 24 || home_temp < 14){
-      setColor(0,255,0);
-      mqtt_client.publish(mqtt_topic_actuators, "WINDOWS OPEN");
+
 
       if (good == 0){
         good = 1;
         maybe = 0;
         bad = 0;
+
+        setColor(0,255,0);
+        mqtt_client.publish(mqtt_topic_actuators, "WINDOWS OPEN");
 
         tempo = 88;
         notes = sizeof(melody_good) / sizeof(melody_good[0]) / 2;
@@ -274,14 +276,13 @@ void loop() {
           }
       }
     } else {
-        setColor(255,255,0);
-        mqtt_client.publish(mqtt_topic_actuators, "MAYBE WINDOWS OPEN");
 
         if (maybe == 0){
           maybe = 1;
           good = 0;
           bad = 0;
-
+          setColor(255,255,0);
+          mqtt_client.publish(mqtt_topic_actuators, "MAYBE WINDOWS OPEN");
           tempo = 105;
           notes = sizeof(melody_maybe) / sizeof(melody_maybe[0]) / 2;
           wholenote = (60000 * 4) / tempo;
@@ -311,14 +312,14 @@ void loop() {
         }
     }
   } else if (strstr(mqttpayload_extern.c_str(), "MAYBE") != NULL) {
-        setColor(255,255,0);
-        mqtt_client.publish(mqtt_topic_actuators, "MAYBE WINDOWS OPEN");
+
 
         if (maybe == 0){
           maybe = 1;
           good = 0;
           bad = 0;
-
+          setColor(255,255,0);
+          mqtt_client.publish(mqtt_topic_actuators, "MAYBE WINDOWS OPEN");
           tempo = 105;
           notes = sizeof(melody_maybe) / sizeof(melody_maybe[0]) / 2;
           wholenote = (60000 * 4) / tempo;
@@ -348,10 +349,11 @@ void loop() {
         }
   } else if (strstr(mqttpayload_extern.c_str(), "BAD") != NULL ) {
       if (home_temp < 33){
-        setColor(255,0,0);
-        mqtt_client.publish(mqtt_topic_actuators, "WINDOWS CLOSED");
+
 
         if (bad == 0) {
+          setColor(255,0,0);
+          mqtt_client.publish(mqtt_topic_actuators, "WINDOWS CLOSED");
           good = 0;
           maybe = 0;
           bad = 1;

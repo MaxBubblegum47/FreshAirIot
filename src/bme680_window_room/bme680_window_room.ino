@@ -190,7 +190,7 @@ void loop() {
       hum_score = 0.10/hum_reference*current_humidity*100;
     else
     {
-      hum_score = ((-0.10/(100-hum_reference)*current_humidity)+0.21)*100;
+      hum_score = ((-0.10/(100-hum_reference)*current_humidity)+0.10)*100;
     }
   }
 
@@ -203,7 +203,7 @@ void loop() {
       temp_score = 0.10/temp_reference*current_temperature*100;
     else
     {
-      temp_score = ((-0.10/(100-temp_reference)*current_temperature)+0.21)*100;
+      temp_score = ((-0.10/(100-temp_reference)*current_temperature)+0.10)*100;
     }
   }
   

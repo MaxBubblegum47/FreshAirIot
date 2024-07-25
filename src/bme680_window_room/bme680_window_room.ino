@@ -183,27 +183,27 @@ void loop() {
 
   float current_humidity = bme.readHumidity();
   if (current_humidity >= 38 && current_humidity <= 42)
-    hum_score = 0.10*100; // Humidity +/-5% around optimum 
+    hum_score = 0.15*100; // Humidity +/-5% around optimum 
   else
   { //sub-optimal
     if (current_humidity < 38) 
-      hum_score = 0.10/hum_reference*current_humidity*100;
+      hum_score = 0.15/hum_reference*current_humidity*100;
     else
     {
-      hum_score = ((-0.10/(100-hum_reference)*current_humidity)+0.10)*100;
+      hum_score = ((-0.15/(100-hum_reference)*current_humidity)+0.15)*100;
     }
   }
 
   float current_temperature = bme.readTemperature();
   if (current_temperature >= 14 && current_temperature <= 30)
-    temp_score = 0.10*100; // Temperature +/-5% around optimum 
+    temp_score = 0.05*100; // Temperature +/-5% around optimum 
   else
   { //sub-optimal
     if (current_temperature < 14) 
-      temp_score = 0.10/temp_reference*current_temperature*100;
+      temp_score = 0.05/temp_reference*current_temperature*100;
     else
     {
-      temp_score = ((-0.10/(100-temp_reference)*current_temperature)+0.10)*100;
+      temp_score = ((-0.05/(100-temp_reference)*current_temperature)+0.05)*100;
     }
   }
   
@@ -217,9 +217,9 @@ void loop() {
   //Combine results for the final IAQ index value (0-100% where 100% is good quality air)
   float air_quality_score = hum_score + gas_score + temp_score;
 
-  Serial.println("Air Quality = "+String(air_quality_score,1)+"% derived from 10% of Humidity reading, 10% Temperature reading and 80% of Gas reading - 100% is good quality air");
-  Serial.println("Humidity element was : "+String(hum_score/100)+" of 0.10");
-  Serial.println("Temperature element was : "+String(hum_score/100)+" of 0.10");
+  Serial.println("Air Quality = "+String(air_quality_score,1)+"% derived from 15% of Humidity reading, 5% Temperature reading and 80% of Gas reading - 100% is good quality air");
+  Serial.println("Humidity element was : "+String(hum_score/100)+" of 0.15");
+  Serial.println("Temperature element was : "+String(hum_score/100)+" of 0.05");
   Serial.println("Gas element was : "+String(gas_score/100)+" of 0.80");
   if (bme.readGas() < 120000) Serial.println("***** Poor air quality *****");
   Serial.println();
@@ -265,22 +265,18 @@ void loop() {
   String extern_message = "BAD";
 
   if (strcmp (aqs.c_str(), "Good") == 0 || strcmp (aqs.c_str(), "Moderate") == 0){
-    if (bme.pressure > 100000) {
-        if (bme.temperature > 12 && bme.temperature < 29){
-          if  (bme.humidity < 60){
-            extern_message = "GOOD";
-          } else {
-            extern_message = "MAYBE";
-          }
-        } else if (bme.temperature < 30 && bme.humidity < 60){
+    if (bme.pressure > 99990) {
+        if (bme.temperature > 12 && bme.temperature < 30 && bme.humidity < 60 && bme.humidity > 40){
+          extern_message = "GOOD";
+        } else if (bme.temperature > 10 && bme.temperature < 32 && bme.humidity < 50 && bme.humidity > 40 ){
           extern_message = "MAYBE";
         }
-    } else {
-      extern_message = "BAD";
-    }
+     }
+          
   } else {
     extern_message = "BAD";
   }
+  
 
   // MQTT Publish Messages
   mqtt_client.publish(mqtt_topic_airquality, aqs.c_str());

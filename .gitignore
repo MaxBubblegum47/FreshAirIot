@@ -56,3 +56,9 @@ WifiPassword.h
 mqttCredentials.h
 openweather_api_key.h
 telegrambotCredentials.h
+
+# Pip env
+bin/
+lib/
+lib64
+pyvenv.cfg

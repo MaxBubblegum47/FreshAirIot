@@ -288,7 +288,7 @@ void loop() {
   mqtt_client.publish(mqtt_topic_extern, extern_message.c_str());
 
 
-  delay(10000);
+  delay(1000 * 1800);
 
   }
 

@@ -39,6 +39,7 @@ const char *mqtt_topic_humidity = "home/room/window/humidity";
 const char *mqtt_topic_airquality = "home/room/window/airquality";
 const char *mqtt_topic_light = "home/room/window/light";
 const char *mqtt_topic_height = "home/room/window/height";
+const char *mqtt_topic_airquality_voltage = "home/room/window/airquality_voltage";
 const char *mqtt_topic_extern = "extern/";
 
 const char *mqtt_username = username;  // MQTT username for authentication
@@ -103,6 +104,7 @@ void connectToMQTTBroker() {
             mqtt_client.subscribe(mqtt_topic_light);
             mqtt_client.subscribe(mqtt_topic_height);
             mqtt_client.subscribe(mqtt_topic_extern);
+            mqtt_client.subscribe(mqtt_topic_airquality_voltage);
 
             // Publish message upon successful connection
             // mqtt_client.publish(mqtt_topic, "Hi EMQX I'm ESP8266 Window Room ^^");
@@ -182,28 +184,28 @@ void loop() {
   Serial.println();
 
   float current_humidity = bme.readHumidity();
-  if (current_humidity >= 38 && current_humidity <= 42)
-    hum_score = 0.15*100; // Humidity +/-5% around optimum 
+  if (current_humidity >= 38 && current_humidity <= 62)
+    hum_score = 0.10*100; // Humidity +/-5% around optimum 
   else
   { //sub-optimal
     if (current_humidity < 38) 
-      hum_score = 0.15/hum_reference*current_humidity*100;
+      hum_score = 0.10/hum_reference*current_humidity*100;
     else
     {
-      hum_score = ((-0.15/(100-hum_reference)*current_humidity)+0.15)*100;
+      hum_score = ((-0.10/(100-hum_reference)*current_humidity)+0.10)*100;
     }
   }
 
   float current_temperature = bme.readTemperature();
-  if (current_temperature >= 14 && current_temperature <= 30)
-    temp_score = 0.05*100; // Temperature +/-5% around optimum 
+  if (current_temperature >= 10 && current_temperature <= 33)
+    temp_score = 0.10*100; // Temperature +/-5% around optimum 
   else
   { //sub-optimal
-    if (current_temperature < 14) 
-      temp_score = 0.05/temp_reference*current_temperature*100;
+    if (current_temperature < 10) 
+      temp_score = 0.10/temp_reference*current_temperature*100;
     else
     {
-      temp_score = ((-0.05/(100-temp_reference)*current_temperature)+0.05)*100;
+      temp_score = ((-0.10/(100-temp_reference)*current_temperature)+0.10)*100;
     }
   }
   
@@ -217,7 +219,7 @@ void loop() {
   //Combine results for the final IAQ index value (0-100% where 100% is good quality air)
   float air_quality_score = hum_score + gas_score + temp_score;
 
-  Serial.println("Air Quality = "+String(air_quality_score,1)+"% derived from 15% of Humidity reading, 5% Temperature reading and 80% of Gas reading - 100% is good quality air");
+  Serial.println("Air Quality = "+String(air_quality_score,1)+"% derived from 10% of Humidity reading, 10% Temperature reading and 80% of Gas reading - 100% is good quality air");
   Serial.println("Humidity element was : "+String(hum_score/100)+" of 0.15");
   Serial.println("Temperature element was : "+String(hum_score/100)+" of 0.05");
   Serial.println("Gas element was : "+String(gas_score/100)+" of 0.80");
@@ -286,6 +288,7 @@ void loop() {
   mqtt_client.publish(mqtt_topic_temperature, String(bme.temperature).c_str());
   mqtt_client.publish(mqtt_topic_height, String(bme.readAltitude(SEALEVELPRESSURE_HPA)).c_str());
   mqtt_client.publish(mqtt_topic_extern, extern_message.c_str());
+  mqtt_client.publish(mqtt_topic_airquality_voltage, String(bme.gas_resistance).c_str());
 
 
   delay(1000 * 1800);

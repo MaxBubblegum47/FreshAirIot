@@ -263,21 +263,22 @@ void loop() {
 
   }
   
+  // Is not useful anymore since the AIQ consider yet temperature and humidity
   // External Condition Calculation
-  String extern_message = "BAD";
+  // String extern_message = "BAD";
 
-  if (strcmp (aqs.c_str(), "Good") == 0 || strcmp (aqs.c_str(), "Moderate") == 0){
-    if (bme.pressure > 99990) {
-        if (bme.temperature > 12 && bme.temperature < 30 && bme.humidity < 60 && bme.humidity > 40){
-          extern_message = "GOOD";
-        } else if (bme.temperature > 10 && bme.temperature < 32 && bme.humidity < 50 && bme.humidity > 40 ){
-          extern_message = "MAYBE";
-        }
-     }
+  // if (strcmp (aqs.c_str(), "Good") == 0 || strcmp (aqs.c_str(), "Moderate") == 0){
+  //   if (bme.pressure > 99990) {
+  //       if (bme.temperature > 12 && bme.temperature < 30 && bme.humidity < 60 && bme.humidity > 40){
+  //         extern_message = "GOOD";
+  //       } else if (bme.temperature > 10 && bme.temperature < 32 && bme.humidity < 50 && bme.humidity > 40 ){
+  //         extern_message = "MAYBE";
+  //       }
+  //    }
           
-  } else {
-    extern_message = "BAD";
-  }
+  // } else {
+  //   extern_message = "BAD";
+  // }
   
 
   // MQTT Publish Messages

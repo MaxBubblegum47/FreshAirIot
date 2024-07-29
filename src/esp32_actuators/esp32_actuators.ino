@@ -64,7 +64,7 @@ const char *mqtt_broker = "broker.emqx.io";  // EMQX broker endpoint
 const char *mqtt_topic_temperature_room = "home/room/temperature";
 const char *mqtt_topic_temperature_hall = "home/hall/temperature";
 const char *mqtt_topic_actuators = "home/actuators";
-const char *mqtt_topic_extern = "extern/";
+const char *mqtt_topic_extern = "home/room/window/airquality";
 const char *mqtt_topic_weather = "weather/";
 
 
@@ -148,7 +148,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     Serial.println(topic);
     Serial.print("Message:");
 
-    if (strcmp(topic, "extern/") == 0){
+    if (strcmp(topic, "home/room/window/airquality") == 0){
       mqttpayload_extern = "";
       //Serial.println("Sono dentro extern\n");
       for (unsigned int i = 0; i < length; i++) {
@@ -236,7 +236,7 @@ void loop() {
        }         
   }
 
-  if (strstr(mqttpayload_extern.c_str(), "GOOD") != NULL) {
+  if (strstr(mqttpayload_extern.c_str(), "Good") != NULL || strstr(mqttpayload_extern.c_str(), "Moderate") != NULL) {
       if (home_temp > 24 || home_temp < 14){
 
 
@@ -311,9 +311,7 @@ void loop() {
             }
         }
     }
-  } else if (strstr(mqttpayload_extern.c_str(), "MAYBE") != NULL) {
-
-
+  } else if (strstr(mqttpayload_extern.c_str(), "Unhealthy for Sensitive Groups") != NULL) {
         if (maybe == 0){
           maybe = 1;
           good = 0;
@@ -347,10 +345,8 @@ void loop() {
               noTone(BUZZER_PIN);
             }
         }
-  } else if (strstr(mqttpayload_extern.c_str(), "BAD") != NULL ) {
+  } else if (strstr(mqttpayload_extern.c_str(), "Unhealthy") != NULL || strstr(mqttpayload_extern.c_str(), "Very Unhealthy") != NULL || strstr(mqttpayload_extern.c_str(), "Hazardous") != NULL) {
       if (home_temp < 33){
-
-
         if (bad == 0) {
           setColor(255,0,0);
           mqtt_client.publish(mqtt_topic_actuators, "WINDOWS CLOSED");

@@ -66,6 +66,8 @@ const char *mqtt_topic_temperature_hall = "home/hall/temperature";
 const char *mqtt_topic_actuators = "home/actuators";
 const char *mqtt_topic_extern = "home/room/window/airquality";
 const char *mqtt_topic_weather = "weather/";
+const char *mqtt_topic_temperature_outside = "home/room/window/temperature";
+const char *mqtt_topic_humidity_outside = "home/room/window/humidity";
 
 
 const char *mqtt_username = username;  // MQTT username for authentication
@@ -76,6 +78,8 @@ String mqttpayload_extern = "";
 String mqttpayload_room_temp = "";
 String mqttpayload_hall_temp = "";
 String mqttpayload_weather = "";
+String mqttpayload_temperature_outside = "";
+String mqttpayload_humidity_outside = "";
 
 WiFiClient espClient;
 PubSubClient mqtt_client(espClient);
@@ -124,6 +128,9 @@ void connectToMQTTBroker() {
             mqtt_client.subscribe(mqtt_topic_actuators);
             mqtt_client.subscribe(mqtt_topic_extern);
             mqtt_client.subscribe(mqtt_topic_weather);
+            mqtt_client.subscribe(mqtt_topic_temperature_outside);
+            mqtt_client.subscribe(mqtt_topic_humidity_outside);
+
 
             
             // Publish message upon successful connection
@@ -176,6 +183,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         mqttpayload_hall_temp.concat((char) payload[i]);
       }
     }
+
    Serial.println();
 
     if (strcmp(topic, "weather/")== 0){
@@ -195,6 +203,28 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         Serial.print((char) payload[i]);
       }
     }
+    
+    Serial.println();
+
+    if (strcmp(topic, "home/room/window/humidity")== 0){
+      mqttpayload_humidity_outside = "";
+      //Serial.println("Sono dentro weather\n");
+      for (unsigned int i = 0; i < length; i++) {
+        Serial.print((char) payload[i]);
+        mqttpayload_humidity_outside.concat((char) payload[i]);
+      }
+    }
+    
+    Serial.println();
+
+    if (strcmp(topic, "home/room/window/temperature")== 0){
+      mqttpayload_temperature_outside = "";
+      //Serial.println("Sono dentro weather\n");
+      for (unsigned int i = 0; i < length; i++) {
+        Serial.print((char) payload[i]);
+        mqttpayload_temperature_outside.concat((char) payload[i]);
+      }
+    }    
 
     Serial.println();
     Serial.println("-----------------------");
@@ -214,6 +244,18 @@ void loop() {
   mqtt_client.loop();
 
   float home_temp = (mqttpayload_room_temp.toFloat() + mqttpayload_hall_temp.toFloat())/2;
+  float outside_temp = mqttpayload_temperature_outside.toFloat();
+  float outside_humidity =  mqttpayload_humidity_outside.toFloat();
+
+  String outside_res = "";
+
+  if (outside_temp < 31){
+    if (outside_humidity < 75){
+      outside_res = "good";
+    }
+  } else if (outside_humidity < 50){
+    outside_res = "maybe";
+  }
   
   // Debugging Print
   // Serial.println("Final values recorded (extern, room temp, hall tempo, weather forecast 1 day): \n");
@@ -236,7 +278,12 @@ void loop() {
        }         
   }
 
+
+
   if (strstr(mqttpayload_extern.c_str(), "Good") != NULL || strstr(mqttpayload_extern.c_str(), "Moderate") != NULL) {
+    if (strstr(outside_res.c_str(), "good") != NULL){
+      Serial.println("outside temperature: " + mqttpayload_temperature_outside + "\n");
+      Serial.println("outside h2O: " + mqttpayload_humidity_outside + "\n");
       if (home_temp > 24 || home_temp < 14){
 
 
@@ -274,8 +321,11 @@ void loop() {
             // stop the waveform generation before the next note.
             noTone(BUZZER_PIN);
           }
+        }
       }
-    } else {
+    } else if (strstr(outside_res.c_str(), "maybe") != NULL){
+      Serial.println("outside temperature: " + mqttpayload_temperature_outside + "\n");
+      Serial.println("outside h2O: " + mqttpayload_humidity_outside + "\n");
 
         if (maybe == 0){
           maybe = 1;
@@ -311,41 +361,7 @@ void loop() {
             }
         }
     }
-  } else if (strstr(mqttpayload_extern.c_str(), "Unhealthy for Sensitive Groups") != NULL) {
-        if (maybe == 0){
-          maybe = 1;
-          good = 0;
-          bad = 0;
-          setColor(255,255,0);
-          mqtt_client.publish(mqtt_topic_actuators, "MAYBE WINDOWS OPEN");
-          tempo = 105;
-          notes = sizeof(melody_maybe) / sizeof(melody_maybe[0]) / 2;
-          wholenote = (60000 * 4) / tempo;
-          divider = 0, noteDuration = 0;
-          for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
-
-              // calculates the duration of each note
-              divider = melody_maybe[thisNote + 1];
-              if (divider > 0) {
-                // regular note, just proceed
-                noteDuration = (wholenote) / divider;
-              } else if (divider < 0) {
-                // dotted notes are represented with negative durations!!
-                noteDuration = (wholenote) / abs(divider);
-                noteDuration *= 1.5; // increases the duration in half for dotted notes
-              }
-
-              // we only play the note for 90% of the duration, leaving 10% as a pause
-              tone(BUZZER_PIN, melody_maybe[thisNote], noteDuration * 0.9);
-
-              // Wait for the specief duration before playing the next note.
-              delay(noteDuration);
-
-              // stop the waveform generation before the next note.
-              noTone(BUZZER_PIN);
-            }
-        }
-  } else if (strstr(mqttpayload_extern.c_str(), "Unhealthy") != NULL || strstr(mqttpayload_extern.c_str(), "Very Unhealthy") != NULL || strstr(mqttpayload_extern.c_str(), "Hazardous") != NULL) {
+  } else if (strstr(mqttpayload_extern.c_str(), "Unhealthy for Sensitive Groups") != NULL || strstr(mqttpayload_extern.c_str(), "Unhealthy") != NULL || strstr(mqttpayload_extern.c_str(), "Very Unhealthy") != NULL || strstr(mqttpayload_extern.c_str(), "Hazardous") != NULL) {
       if (home_temp < 33){
         if (bad == 0) {
           setColor(255,0,0);
